@@ -1,8 +1,8 @@
 {
-  "name": "com.company-name.package-name",
+  "name": "com.sag.unity-fsm",
   "version": "0.0.1",
-  "displayName": "Pretty package name",
-  "description": "Your package description.",
+  "displayName": "FSM for Unity",
+  "description": "Finite state machine for Unity.",
   "unity": "2019.4",
   "unityRelease": "8f1",
   "keywords": [
