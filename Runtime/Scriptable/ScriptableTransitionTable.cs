@@ -14,6 +14,8 @@ namespace SaG.FSM.Scriptable
             public ScriptableState fromState;
             public ScriptableState toState;
             public List<ScriptableCondition> conditions;
+
+            public Transition ToTransition() => new Transition(toState, conditions);
         }
 
         private class Transition : ITransition
@@ -53,20 +55,12 @@ namespace SaG.FSM.Scriptable
             }
         }
 
-        public IDictionary<IState, IEnumerable<ITransition>> Get()
+        public ITransitionsMap Get()
         {
-            Dictionary<IState, List<ITransition>> dictionary = new Dictionary<IState, List<ITransition>>();
+            ITransitionsMap result = new TransitionsMap();
             foreach (var transition in _transitions)
             {
-                if (!dictionary.ContainsKey(transition.fromState))
-                    dictionary.Add(transition.fromState, new List<ITransition>());
-                dictionary[transition.fromState].Add(new Transition(transition.toState, transition.conditions));
-            }
-            
-            IDictionary<IState, IEnumerable<ITransition>> result = new Dictionary<IState, IEnumerable<ITransition>>();
-            foreach (var pair in dictionary)
-            {
-                result.Add(pair.Key, pair.Value);
+                result.AddFromState(transition.fromState, transition.ToTransition());
             }
             return result;
         }

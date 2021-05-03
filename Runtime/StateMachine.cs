@@ -1,23 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace SaG.FSM
 {
-    public class StateMachine : IStateMachine
+    public class StateMachine : IStateMachine, IDisposable
     {
         public IState CurrentState => _currentState;
 
         private IState _currentState;
-        private readonly IDictionary<IState, IEnumerable<ITransition>> _transitionsMap;
+        private readonly ITransitionsMap _transitionsMap;
 
         public event Action<IState> StateChanged; 
         
-        public StateMachine(IState state, IDictionary<IState, IEnumerable<ITransition>> transitionsMap)
+        public StateMachine(IState state, ITransitionsMap transitionsMap)
         {
-            _currentState = state;
-            _transitionsMap = transitionsMap;
+            _currentState = state ?? throw new ArgumentNullException(nameof(state));
+            _transitionsMap = transitionsMap ?? throw new ArgumentNullException(nameof(transitionsMap));
+            foreach (var transition in _transitionsMap.GetTransitionsFromAnyState())
+            {
+                transition.OnEnter();
+            }
             _currentState.OnEnter();
         }
 
@@ -25,34 +30,52 @@ namespace SaG.FSM
         {
             if (state == null)
                 throw new ArgumentNullException(nameof(state));
-            _currentState?.OnExit();
+            _currentState.OnExit();
+            foreach (var transition in _transitionsMap.GetTransitionsFromState(_currentState))
+            {
+                transition.OnExit();
+            }
             _currentState = state;
-            _currentState?.OnEnter();
+            foreach (var transition in _transitionsMap.GetTransitionsFromState(_currentState))
+            {
+                transition.OnEnter();
+            }
+            _currentState.OnEnter();
             OnStateChanged();
         }
 
         public void OnUpdate(float deltaTime)
         {
-            IEnumerable<ITransition> transitions = _transitionsMap[CurrentState];
-            IState nextState = null;
-            foreach (var transition in transitions)
+            IEnumerable<ITransition> anyStateTransitions = _transitionsMap.GetTransitionsFromAnyState();
+            IEnumerable<ITransition> fromStateTransitions = _transitionsMap.GetTransitionsFromState(CurrentState);
+            
+            foreach (var transition in anyStateTransitions.Concat(fromStateTransitions))
             {
+                transition.OnUpdate(deltaTime);
                 if (transition.Evaluate())
                 {
-                    nextState = transition.TargetState;
+                    var nextState = transition.TargetState;
                     Debug.Log($"Transiting to {nextState} because of {transition}", transition as Object);
-                    break;
+                    ChangeState(nextState);
+                    return;
                 }
             }
-            if (nextState != null)
-                ChangeState(nextState);
             
-            _currentState?.OnUpdate(deltaTime);
+            _currentState.OnUpdate(deltaTime);
         }
 
-        protected virtual void OnStateChanged()
+        private void OnStateChanged()
         {
             StateChanged?.Invoke(CurrentState);
+        }
+
+        public void Dispose()
+        {
+            _currentState.OnExit();
+            foreach (var transition in _transitionsMap.GetTransitionsFromAnyState())
+            {
+                transition.OnExit();
+            }
         }
     }
 }

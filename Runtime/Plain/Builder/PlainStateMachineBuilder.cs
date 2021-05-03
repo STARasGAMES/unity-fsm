@@ -5,7 +5,7 @@ namespace SaG.FSM.Plain.Builder
 {
     public class PlainStateMachineBuilder
     {
-        private Dictionary<IState, List<ITransition>> _transitions = new Dictionary<IState, List<ITransition>>();
+        private readonly ITransitionsMap _transitionsMap = new TransitionsMap();
         
         private IState _currentState;
         private IState _defaultState;
@@ -30,22 +30,19 @@ namespace SaG.FSM.Plain.Builder
         {
             if (_currentState == null)
                 throw new Exception("Invalid builder state. Call From<T>() before using To<T>()");
-            if (!_transitions.ContainsKey(_currentState))
-                _transitions.Add(_currentState, new List<ITransition>());
-            var transition = new PlainTransition(_currentState, condition);
-            _transitions[state].Add(transition);
+            if (state == null)
+                throw new ArgumentNullException(nameof(state));
+            if (condition == null)
+                throw new ArgumentNullException(nameof(condition));
+            var transition = new PlainTransition(state, condition);
+            _transitionsMap.AddFromState(_currentState, transition);
             return this;
         }
         
         
         public IStateMachine Build()
         {
-            IDictionary<IState, IEnumerable<ITransition>> transitionsMap = new Dictionary<IState, IEnumerable<ITransition>>();
-            foreach (var pair in _transitions)
-            {
-                transitionsMap.Add(pair.Key, pair.Value);
-            }
-            return new StateMachine(_defaultState, transitionsMap);
+            return new StateMachine(_defaultState, _transitionsMap);
         }
     }
 }
