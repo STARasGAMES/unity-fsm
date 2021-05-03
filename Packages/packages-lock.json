@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.sag.unity-fsm": {
-      "version": "file:com.sag.unity-fsm",
+      "version": "file:SaG.FSM",
       "depth": 0,
       "source": "embedded",
       "dependencies": {}
