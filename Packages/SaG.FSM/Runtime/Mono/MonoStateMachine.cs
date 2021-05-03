@@ -38,18 +38,21 @@ namespace SaG.FSM.Mono
             OnUpdate(Time.deltaTime);
         }
 
-        private IDictionary<IState, IEnumerable<ITransition>> GetTransitionTable()
+        private ITransitionsMap GetTransitionTable()
         {
             List<MonoState> states = new List<MonoState>();
             GetComponentsInChildren(states);
             
-            IDictionary<IState, IEnumerable<ITransition>> table = new Dictionary<IState, IEnumerable<ITransition>>();
+            var transitionsMap = new TransitionsMap();
             foreach (var state in states)
             {
-                table.Add(state, state.GetComponentsInChildren<ITransition>());
+                foreach (var transition in state.GetComponentsInChildren<ITransition>())
+                {
+                    transitionsMap.AddFromState(state, transition);
+                }
             }
 
-            return table;
+            return transitionsMap;
         }
     }
 }
