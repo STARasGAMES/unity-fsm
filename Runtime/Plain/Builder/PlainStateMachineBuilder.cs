@@ -9,6 +9,12 @@ namespace SaG.FSM.Plain.Builder
         
         private IState _currentState;
         private IState _defaultState;
+        private bool _isBuildingTransitionsFromAnyState;
+
+        private PlainStateMachineBuilder()
+        {
+            
+        }
         
         public PlainStateMachineBuilder Default(IState state)
         {
@@ -23,26 +29,48 @@ namespace SaG.FSM.Plain.Builder
             if (state == null)
                 throw new ArgumentNullException(nameof(state));
             _currentState = state;
+            _isBuildingTransitionsFromAnyState = false;
+            return this;
+        }
+        
+        public PlainStateMachineBuilder FromAny()
+        {
+            _isBuildingTransitionsFromAnyState = true;
+            _currentState = null;
             return this;
         }
         
         public PlainStateMachineBuilder To(IState state, Func<bool> condition)
         {
-            if (_currentState == null)
-                throw new Exception("Invalid builder state. Call From<T>() before using To<T>()");
             if (state == null)
                 throw new ArgumentNullException(nameof(state));
             if (condition == null)
                 throw new ArgumentNullException(nameof(condition));
+            
             var transition = new PlainTransition(state, condition);
+            if (_isBuildingTransitionsFromAnyState)
+            {
+                _transitionsMap.AddFromAnyState(transition);
+                return this;
+            }
+            
+            if (_currentState == null)
+                throw new Exception("Invalid builder state. Call From<T>() or FromAny() before using To<T>()");
+            
             _transitionsMap.AddFromState(_currentState, transition);
             return this;
         }
         
-        
         public IStateMachine Build()
         {
             return new StateMachine(_defaultState, _transitionsMap);
+        }
+
+        public static PlainStateMachineBuilder Create(IState defaultState)
+        {
+            var builder = new PlainStateMachineBuilder();
+            builder.Default(defaultState);
+            return builder;
         }
     }
 }

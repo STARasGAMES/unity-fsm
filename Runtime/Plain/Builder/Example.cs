@@ -20,8 +20,8 @@
             float speed = 10;
             bool jump = true;
             bool isGrounded = false;
-            IStateMachine stateMachine = new PlainStateMachineBuilder()
-                .Default(idleState)
+            IStateMachine stateMachine = PlainStateMachineBuilder
+                .Create(idleState)
                 
                 .From(idleState)
                 .To(runState, () => speed >= 10)

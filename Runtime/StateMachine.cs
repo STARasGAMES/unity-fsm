@@ -51,6 +51,8 @@ namespace SaG.FSM
             
             foreach (var transition in anyStateTransitions.Concat(fromStateTransitions))
             {
+                if (transition.IsMuted)
+                    continue;
                 transition.OnUpdate(deltaTime);
                 if (transition.Evaluate())
                 {

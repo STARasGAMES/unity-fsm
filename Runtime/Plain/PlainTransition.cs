@@ -14,6 +14,7 @@ namespace SaG.FSM.Plain
         }
 
         public IState TargetState => _toState;
+        public bool IsMuted { get; } = false;
 
         public virtual bool Evaluate()
         {

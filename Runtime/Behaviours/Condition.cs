@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace SaG.FSM.Mono
+namespace SaG.FSM.Behaviours
 {
-    public abstract class MonoCondition : MonoBehaviour, ICondition
+    public abstract class Condition : MonoBehaviour, ICondition
     {
         [SerializeField] private bool _inverse = false;
 

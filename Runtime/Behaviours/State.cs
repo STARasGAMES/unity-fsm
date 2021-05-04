@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace SaG.FSM.Mono
+namespace SaG.FSM.Behaviours
 {
-    public class MonoState : MonoBehaviour, IState
+    public class State : MonoBehaviour, IState
     {
         private List<IStateAction> _actions;
         private List<ITransition> _transitions;
