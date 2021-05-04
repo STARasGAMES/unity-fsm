@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace SaG.FSM.Mono
+namespace SaG.FSM.Behaviours
 {
-    public abstract class MonoStateAction : MonoBehaviour, IStateAction
+    public abstract class StateAction : MonoBehaviour, IStateAction
     {
         public virtual void OnEnter() { }
 

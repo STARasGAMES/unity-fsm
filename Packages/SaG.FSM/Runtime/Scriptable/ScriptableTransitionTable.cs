@@ -30,7 +30,8 @@ namespace SaG.FSM.Scriptable
             }
 
             public IState TargetState => _targetState;
-            
+            public bool IsMuted { get; } = false;
+
             public bool Evaluate()
             {
                 return _conditions.All(c => c.Value);

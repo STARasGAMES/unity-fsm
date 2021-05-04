@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SaG.FSM.Mono
+namespace SaG.FSM.Behaviours
 {
-    public class MonoStateMachine : MonoBehaviour, IStateMachine
+    public class StateMachineBehaviour : MonoBehaviour, IStateMachine
     {
-        [SerializeField] private MonoState _defaultState = default;
+        [SerializeField] private State _defaultState = default;
+        [SerializeField] private Transform _anyStatesRoot = default;
         protected IStateMachine _stateMachine;
 
         public IStateMachine StateMachine => _stateMachine ?? (_stateMachine = new StateMachine(_defaultState, GetTransitionTable()));
@@ -40,7 +41,7 @@ namespace SaG.FSM.Mono
 
         private ITransitionsMap GetTransitionTable()
         {
-            List<MonoState> states = new List<MonoState>();
+            List<State> states = new List<State>();
             GetComponentsInChildren(states);
             
             var transitionsMap = new TransitionsMap();
@@ -49,6 +50,17 @@ namespace SaG.FSM.Mono
                 foreach (var transition in state.GetComponentsInChildren<ITransition>())
                 {
                     transitionsMap.AddFromState(state, transition);
+                }
+            }
+
+            if (_anyStatesRoot)
+            {
+                foreach (Transform t in _anyStatesRoot)
+                {
+                    if (t.TryGetComponent<ITransition>(out var transition))
+                    {
+                        transitionsMap.AddFromAnyState(transition);
+                    }
                 }
             }
 
